@@ -25,3 +25,8 @@ class MySQL:
         ''' Alias of get_rows() '''
         return self.get_rows(query)
     
+    def insert(self, table, data):
+        ''' insert row into table ''' 
+        sql = "INSERT INTO {} ({}) VALUES ({})".format(table, ', '.join(data.keys()), ', '.join(('%s' for _ in data)))
+        with self.db.cursor() as cursor:
+            cursor.execute(sql, list(data.values()))
