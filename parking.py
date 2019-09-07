@@ -5,12 +5,7 @@ from settings import *
 BOT_TOKEN = os.environ['BOT_TOKEN']
 
 bot = telebot.TeleBot(BOT_TOKEN)
-
-queries = Queries()
-for row in queries.get_all_parking():
-    print(row)
-    
-
+repo = Queries()
 
 def create_keyboard():
     keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
@@ -24,12 +19,22 @@ def send_welcome(message):
         reply_markup=create_keyboard())
         
 @bot.message_handler(func=lambda message: message.text == keyboard_buttons['about'])
-def handle_message(message):
+def handle_abut(message):
+    ''' Send info about bot '''
     bot.send_message(chat_id=message.chat.id, text=ABOUT_TEXT, reply_markup=create_keyboard())
 
+@bot.message_handler(func=lambda message: message.text == keyboard_buttons['list'])
+def handle_message(message):
+    ''' Send LIST of disturbers '''
+    text = 'Список 10 героев парковки: \n\n'
+    for row in repo.get_all_parking():
+        text += f" - {row['car_plate']} {row['description']} \n"
+    bot.send_message(chat_id=message.chat.id, text=text, reply_markup=create_keyboard())
+    
 @bot.message_handler()
 def handle_message(message):
     print(message.text)
     bot.send_message(chat_id=message.chat.id, text='Hi there', reply_markup=create_keyboard())
 
+print('Starting bot...')
 bot.polling()
