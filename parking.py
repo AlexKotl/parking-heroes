@@ -17,7 +17,7 @@ keyboard_buttons = {
 }
 
 def create_keyboard():
-    keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2)
+    keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
     keyboard.add(*keyboard_buttons.values())
     return keyboard
 
