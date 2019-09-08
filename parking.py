@@ -87,7 +87,6 @@ def handle_message(message):
 @bot.message_handler(func=lambda message: get_step(message) == STEP_ADD_PLATE)
 def handle_message(message):
     ''' Adding plate no to database, requesting details '''
-    print('adding')
     number = plate.format_plate(message.text)
     if number == False:
         reply = f'Введенный вами номер "{message.text}" не распознан как автомобильный номер. Попробуйте снова:'
@@ -104,8 +103,16 @@ def handle_message(message):
 
 @bot.message_handler(func=lambda message: get_step(message) == STEP_ADD_DESCRIPTION)
 def handle_about(message):
-    ''' Adding details '''
+    ''' Adding description to plate no '''
+    record_id = repo.get_latest_parking_by_user(message.from_user.id)['id']
+    reply = ''
+    try:
+        repo.add_parking_description(record_id, message.text)
+        reply = 'Описание к нарушению добавлено. \nДобавить еще нарушителя? Воспользуйтесь кнопками внизу.'
+    except:
+        reply = f'Что-то пошло не так... Не могу добавить описание. '
     set_step(message, STEP_DEFAULT)
+    bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard())
 
 print('Starting bot...')
 bot.polling()
