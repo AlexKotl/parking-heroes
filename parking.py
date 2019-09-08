@@ -2,6 +2,7 @@ import os
 import telebot
 from collections import defaultdict
 from queries import Queries 
+from plate import Plate
 from settings import *
 BOT_TOKEN = os.environ['BOT_TOKEN']
 STEP_DEFAULT, STEP_PLATE_INFO = 0, 1
@@ -9,6 +10,7 @@ STEP_DEFAULT, STEP_PLATE_INFO = 0, 1
 user_step = defaultdict(lambda: STEP_DEFAULT)
 bot = telebot.TeleBot(BOT_TOKEN)
 repo = Queries()
+plate = Plate()
 
 def create_keyboard():
     keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
@@ -49,7 +51,20 @@ def handle_abut(message):
 @bot.message_handler(func=lambda message: get_step(message) == STEP_PLATE_INFO)
 def handle_abut(message):
     ''' Send info about specific plate no '''
-    bot.send_message(chat_id=message.chat.id, text="Был произведен поиск", reply_markup=create_keyboard())
+    number = plate.format_plate(message.text)
+    reply = ''
+    if number == False:
+        reply = f'Введенный вами номер "{message.text}" не распознан как автомобильный номер.'
+    else:
+        rows = repo.get_parking_by_plate(number)
+        if rows == False:
+            reply = f"Записей по номеру {message.text} не было найдено. Похоже автомобиль не нарушал правил парковки."
+        else:
+            reply = f"Найденные записи по номеру {message.text}: \n\n"
+            for row in rows:
+                reply += f" - {row['description']}"
+        
+    bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard())
     set_step(message, STEP_DEFAULT)
     
 
