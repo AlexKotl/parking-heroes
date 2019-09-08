@@ -15,10 +15,10 @@ class MySQL:
             cursorclass=DictCursor
         )
         
-    def get_rows(self, query, data={}):
+    def get_rows(self, query, data=()):
         ''' Run query and return cursor '''
         with self.db.cursor() as cursor:
-            cursor.execute(query, list(data.values()))
+            cursor.execute(query, data)
             if int(cursor.rowcount) == 0:
                 return False
             return cursor
