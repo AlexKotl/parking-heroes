@@ -1,6 +1,7 @@
 import os
 import telebot
 import datetime
+import requests
 from collections import defaultdict
 from queries import Queries 
 from plate import Plate
@@ -26,9 +27,7 @@ def set_step(message, step):
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-	bot.send_message(chat_id=message.chat.id, 
-        text=START_TEXT, 
-        reply_markup=create_keyboard())
+	bot.send_message(chat_id=message.chat.id, text=START_TEXT, reply_markup=create_keyboard())
 
 # INFO
 
@@ -45,7 +44,7 @@ def handle_message(message):
 def handle_message(message):
     ''' Send LIST of disturbers '''
     text = 'Список 10 героев парковки: \n\n'
-    for row in repo.get_all_parking():
+    for row in repo.get_top_parkings():
         text += f" - {row['car_plate']} {row['description']} \n"
     bot.send_message(chat_id=message.chat.id, text=text, reply_markup=create_keyboard())
     set_step(message, STEP_DEFAULT)
@@ -104,7 +103,7 @@ def handle_message(message):
     bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard())
 
 @bot.message_handler(func=lambda message: get_step(message) == STEP_ADD_DESCRIPTION)
-def handle_about(message):
+def handle_message(message):
     ''' Adding description to plate no '''
     record_id = repo.get_latest_parking_by_user(message.from_user.id)['id']
     reply = ''
@@ -115,6 +114,20 @@ def handle_about(message):
         reply = f'Что-то пошло не так... Не могу добавить описание. '
     set_step(message, STEP_DEFAULT)
     bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard())
+    
+@bot.message_handler(content_types=['photo'])
+def handle_message(message):
+    try:
+        record_id = repo.get_latest_parking_by_user(message.from_user.id)['id']
+        photo_info = bot.get_file(message.photo[-1].file_id)
+        photo = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(BOT_TOKEN, photo_info.file_path))
+        with open(os.path.join("upload", f"{record_id}.jpg"), 'wb') as f:
+            f.write(photo.content)
+        reply = 'Фото добавлено.'
+    except:
+        reply = 'Ошибка при загрузке фото.'
+    bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard())
+    set_step(message, STEP_DEFAULT)
 
 print('Starting bot...')
 bot.polling()

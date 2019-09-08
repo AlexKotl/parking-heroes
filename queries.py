@@ -4,8 +4,8 @@ class Queries:
     def __init__(self):
         self.db = MySQL()
         
-    def get_all_parking(self):
-        return self.db.get_rows("SELECT * FROM parking")
+    def get_top_parkings(self):
+        return self.db.get_rows("SELECT * FROM parking ORDER BY id DESC LIMIT 10")
     
     def get_parking_by_plate(self, plate):
         return self.db.get_rows("SELECT * FROM parking WHERE car_plate = %s ORDER BY id DESC", (plate,))
