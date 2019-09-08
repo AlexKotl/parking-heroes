@@ -40,3 +40,11 @@ class MySQL:
         with self.db.cursor() as cursor:
             cursor.execute(sql, list(data.values()))
             self.db.commit()
+    
+    def update(self, table, id, data):
+        ''' Update record from table by it record ID '''
+        fields = ', '.join(map(lambda key: f"{key} = %s", data.keys()))
+        sql = "UPDATE {} SET {} WHERE id={}".format(table, fields, id)
+        with self.db.cursor() as cursor:
+            cursor.execute(sql, list(data.values()))
+            self.db.commit()
