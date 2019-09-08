@@ -1,5 +1,6 @@
 import os
 import telebot
+import datetime
 from collections import defaultdict
 from queries import Queries 
 from plate import Plate
@@ -52,7 +53,9 @@ def handle_abut(message):
 def handle_abut(message):
     ''' Send info about specific plate no '''
     number = plate.format_plate(message.text)
+    print('Checking plate {}'.format(number))
     reply = ''
+    
     if number == False:
         reply = f'Введенный вами номер "{message.text}" не распознан как автомобильный номер.'
     else:
@@ -62,7 +65,7 @@ def handle_abut(message):
         else:
             reply = f"Найденные записи по номеру {message.text}: \n\n"
             for row in rows:
-                reply += f" - {row['description']}"
+                reply += f" - {row['description']} ({row['date_created'].date()})"
         
     bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard())
     set_step(message, STEP_DEFAULT)
