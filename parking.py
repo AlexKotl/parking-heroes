@@ -33,10 +33,11 @@ def send_welcome(message):
 # INFO
 
 @bot.message_handler(func=lambda message: message.text == keyboard_buttons['about'])
-def handle_abut(message):
+def handle_message(message):
     ''' Send info about bot '''
     print(message.from_user)
     bot.send_message(chat_id=message.chat.id, text=ABOUT_TEXT, reply_markup=create_keyboard())
+    set_step(message, STEP_DEFAULT)
 
 # LIST
 
@@ -47,17 +48,18 @@ def handle_message(message):
     for row in repo.get_all_parking():
         text += f" - {row['car_plate']} {row['description']} \n"
     bot.send_message(chat_id=message.chat.id, text=text, reply_markup=create_keyboard())
+    set_step(message, STEP_DEFAULT)
 
 # CAR DETAILS
     
 @bot.message_handler(func=lambda message: message.text == keyboard_buttons['details'])
-def handle_abut(message):
+def handle_message(message):
     ''' Ask for plate no to send info about it '''
     bot.send_message(chat_id=message.chat.id, text="Введите номерной знак (например АА8765ОЕ):", reply_markup=create_keyboard())
     set_step(message, STEP_PLATE_INFO)
     
 @bot.message_handler(func=lambda message: get_step(message) == STEP_PLATE_INFO)
-def handle_abut(message):
+def handle_message(message):
     ''' Send info about specific plate no '''
     number = plate.format_plate(message.text)
     reply = ''
@@ -94,7 +96,7 @@ def handle_message(message):
         try:
             repo.add_parking(car_plate=number, user_id=message.from_user.id, user_username=message.from_user.username, user_first_name=message.from_user.first_name, user_last_name=message.from_user.last_name)
             reply = f'Машина с номерным знаком {number} добавлена. \n\n' \
-                'Теперь вы можете добавить фото нарушения или комментарий (такой как марку и модель авто, условия парковки, пожелания и прочее):'
+                'Теперь вы можете прикрепить фото нарушения или добавить комментарий (такой как марку и модель авто, условия парковки, пожелания и прочее):'
             set_step(message, STEP_ADD_DESCRIPTION)
         except Exception as e:
             reply = f'Ошибка при добавлении записи: {e}'
