@@ -23,6 +23,13 @@ class MySQL:
                 return False
             return cursor
             
+    def get_row(self, query, data=()):
+        ''' Get one row and return as dict '''
+        res = self.get_rows(query, data)
+        if res == False:
+            return False
+        return res.fetchone()
+            
     def query(self, query):
         ''' Alias of get_rows() '''
         return self.get_rows(query)
