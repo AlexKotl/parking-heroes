@@ -53,7 +53,6 @@ def handle_abut(message):
 def handle_abut(message):
     ''' Send info about specific plate no '''
     number = plate.format_plate(message.text)
-    print('Checking plate {}'.format(number))
     reply = ''
     
     if number == False:

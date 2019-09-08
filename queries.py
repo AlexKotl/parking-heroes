@@ -13,6 +13,7 @@ class Queries:
     def add_parking(self, **kwargs):
         data = {
             'car_plate': kwargs['car_plate'],
-            'description': kwargs['description']
+            'description': kwargs['description'],
+            'user_id': kwargs['user_id'],
         }
         return self.db.insert('parking', data)
