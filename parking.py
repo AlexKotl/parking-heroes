@@ -2,6 +2,7 @@ import os
 import telebot
 import datetime
 import requests
+import plural_ru
 from collections import defaultdict
 from queries import Queries 
 from plate import Plate
@@ -27,7 +28,14 @@ def set_step(message, step):
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-	bot.send_message(chat_id=message.chat.id, text=START_TEXT, reply_markup=create_keyboard())
+	bot.send_message(chat_id=message.chat.id, text=START_TEXT + '\n\n' + get_summary_text(), reply_markup=create_keyboard())
+    
+def get_summary_text():
+    stats = repo.get_overall_stats()
+    text = f'У нас уже зафиксировано: {stats["cars_count"]} {plural_ru.ru(stats["cars_count"],["нарушитель","нарушителя","нарушителей"])}, ' \
+        f'{stats["records_count"]} {plural_ru.ru(stats["records_count"],["нарушение","нарушения","нарушений"])}, ' \
+        f'о которых нам сообщили {stats["users_count"]} {plural_ru.ru(stats["users_count"], ["пользователь","пользователя","пользователей"])}. '
+    return text
 
 # INFO
 
@@ -35,7 +43,7 @@ def send_welcome(message):
 def handle_message(message):
     ''' Send info about bot '''
     print(message.from_user)
-    bot.send_message(chat_id=message.chat.id, text=ABOUT_TEXT, reply_markup=create_keyboard())
+    bot.send_message(chat_id=message.chat.id, text=ABOUT_TEXT + '\n\n' + get_summary_text(), reply_markup=create_keyboard())
     set_step(message, STEP_DEFAULT)
 
 # LIST
@@ -109,7 +117,7 @@ def handle_message(message):
     reply = ''
     try:
         repo.add_parking_description(record_id, message.text)
-        reply = 'Описание к нарушению добавлено. \nДобавить еще нарушителя? Воспользуйтесь кнопками внизу.'
+        reply = 'Описание к нарушению добавлено. \nДобавить еще нарушителя? Воспользуйтесь кнопками ниже.'
     except:
         reply = f'Что-то пошло не так... Не могу добавить описание. '
     set_step(message, STEP_DEFAULT)

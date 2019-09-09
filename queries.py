@@ -12,6 +12,9 @@ class Queries:
     
     def get_latest_parking_by_user(self, id):
         return self.db.get_row("SELECT * FROM parking WHERE user_id = %s ORDER BY id DESC LIMIT 1", (id,))
+        
+    def get_overall_stats(self):
+        return self.db.get_row("SELECT count(distinct car_plate) as cars_count, count(distinct user_id) as users_count, count(id) as records_count from parking")
 
     def add_parking(self, **kwargs):
         data = {

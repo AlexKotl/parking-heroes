@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 pytelegrambotapi = "*"
 pymysql = "*"
+plural-ru = "*"
 
 [requires]
 python_version = "3.6"
