@@ -25,6 +25,6 @@ class Queries:
             'user_last_name': kwargs['user_last_name'],
         }
         return self.db.insert('parking', data)
-
-    def add_parking_description(self, id, description):
-        return self.db.update('parking', id, { 'description': description })
+        
+    def edit_parking(self, id, data):
+        return self.db.update('parking', id, data)

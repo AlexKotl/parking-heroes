@@ -42,7 +42,6 @@ def get_summary_text():
 @bot.message_handler(func=lambda message: message.text == keyboard_buttons['about'])
 def handle_message(message):
     ''' Send info about bot '''
-    print(message.from_user)
     bot.send_message(chat_id=message.chat.id, text=ABOUT_TEXT + '\n\n' + get_summary_text(), reply_markup=create_keyboard())
     set_step(message, STEP_DEFAULT)
 
@@ -72,7 +71,7 @@ def handle_message(message):
     reply = ''
     
     if number == False:
-        reply = f'Введенный вами номер "{message.text}" не распознан как автомобильный номер.'
+        reply = f'Введенный вами номер "{message.text}" не распознан как автомобильный номер. Попробуйте снова:'
     else:
         rows = repo.get_parking_by_plate(number)
         if rows == False:
@@ -81,9 +80,8 @@ def handle_message(message):
             reply = f"Найденные записи по номеру {message.text}: \n\n"
             for row in rows:
                 reply += f" - {row['description']} ({row['date_created'].date()})"
-        
+        set_step(message, STEP_DEFAULT)
     bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard())
-    set_step(message, STEP_DEFAULT)
 
 # ADD CAR
 
@@ -113,29 +111,38 @@ def handle_message(message):
 @bot.message_handler(func=lambda message: get_step(message) == STEP_ADD_DESCRIPTION)
 def handle_message(message):
     ''' Adding description to plate no '''
-    record_id = repo.get_latest_parking_by_user(message.from_user.id)['id']
+    row = repo.get_latest_parking_by_user(message.from_user.id)
     reply = ''
     try:
-        repo.add_parking_description(record_id, message.text)
-        reply = 'Описание к нарушению добавлено. \nДобавить еще нарушителя? Воспользуйтесь кнопками ниже.'
+        repo.edit_parking(row['id'], { 'description': message.text })
+        reply = 'Описание к нарушению добавлено.'
+        if row['photo'] == '':
+            reply += '\nТеперь можете прикрепить фото нарушения (опционально):'
+        else:
+            set_step(message, STEP_DEFAULT)
     except:
         reply = f'Что-то пошло не так... Не могу добавить описание. '
-    set_step(message, STEP_DEFAULT)
+        set_step(message, STEP_DEFAULT)
+    
     bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard())
     
 @bot.message_handler(content_types=['photo'])
 def handle_message(message):
     try:
-        record_id = repo.get_latest_parking_by_user(message.from_user.id)['id']
+        row = repo.get_latest_parking_by_user(message.from_user.id)
         photo_info = bot.get_file(message.photo[-1].file_id)
         photo = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(BOT_TOKEN, photo_info.file_path))
-        with open(os.path.join("upload", f"{record_id}.jpg"), 'wb') as f:
+        with open(os.path.join("upload", f"{row['id']}.jpg"), 'wb') as f:
             f.write(photo.content)
+        repo.edit_parking(row['id'], { 'photo': f"{row['id']}.jpg" })
         reply = 'Фото добавлено.'
+        if row['description'] == '':
+            reply += '\nТакже можете добавить комментарий к нарушению (опционально):'
+        else:
+            set_step(message, STEP_DEFAULT)
     except:
         reply = 'Ошибка при загрузке фото.'
     bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard())
-    set_step(message, STEP_DEFAULT)
 
 print('Starting bot...')
 bot.polling()
