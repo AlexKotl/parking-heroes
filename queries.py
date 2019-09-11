@@ -23,6 +23,7 @@ class Queries:
             'user_username': kwargs['user_username'],
             'user_first_name': kwargs['user_first_name'],
             'user_last_name': kwargs['user_last_name'],
+            'description': '', # insert empty text at start
         }
         return self.db.insert('parking', data)
         
