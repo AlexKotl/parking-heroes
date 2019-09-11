@@ -5,16 +5,17 @@ class Queries:
         self.db = MySQL()
         
     def get_top_parkings(self):
-        return self.db.get_rows("SELECT * FROM parking ORDER BY id DESC LIMIT 10")
+        return self.db.get_rows("SELECT * FROM parking WHERE flag=1 ORDER BY id DESC LIMIT 10")
     
     def get_parking_by_plate(self, plate):
-        return self.db.get_rows("SELECT * FROM parking WHERE car_plate = %s ORDER BY id DESC", (plate,))
+        return self.db.get_rows("SELECT * FROM parking WHERE car_plate = %s AND flag=1 ORDER BY id DESC", (plate,))
     
     def get_latest_parking_by_user(self, id):
-        return self.db.get_row("SELECT * FROM parking WHERE user_id = %s ORDER BY id DESC LIMIT 1", (id,))
+        return self.db.get_row("SELECT * FROM parking WHERE user_id = %s AND flag=1 ORDER BY id DESC LIMIT 1", (id,))
         
     def get_overall_stats(self):
-        return self.db.get_row("SELECT count(distinct car_plate) as cars_count, count(distinct user_id) as users_count, count(id) as records_count from parking")
+        return self.db.get_row("SELECT count(distinct car_plate) as cars_count, count(distinct user_id) as users_count, count(id) as records_count "\
+            "FROM parking WHERE flag=1")
 
     def add_parking(self, **kwargs):
         data = {
