@@ -5,7 +5,10 @@ class Queries:
         self.db = MySQL()
         
     def get_top_parkings(self):
-        return self.db.get_rows("SELECT * FROM parking WHERE flag=1 ORDER BY id DESC LIMIT 10")
+        return self.db.get_rows(""" SELECT *, count(distinct id) as count, GROUP_CONCAT(description SEPARATOR '. ') as all_descriptions 
+            FROM parking WHERE flag=1 
+            GROUP BY car_plate 
+            ORDER BY id DESC LIMIT 10 """)
     
     def get_parking_by_plate(self, plate):
         return self.db.get_rows("SELECT * FROM parking WHERE car_plate = %s AND flag=1 ORDER BY id DESC", (plate,))
