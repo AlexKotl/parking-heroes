@@ -26,6 +26,15 @@ def get_step(message):
 def set_step(message, step):
     user_step[message.chat.id] = step
 
+def send_photo(message, filename):
+    if filename == '':
+        return False
+    try:
+        photo = open(f'upload/{filename}', 'rb')
+        bot.send_photo(message.chat.id, photo)
+    except:
+        print(f'Cant open photo {filename}')
+
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
 	bot.send_message(chat_id=message.chat.id, text=START_TEXT + '\n\n' + get_summary_text(), reply_markup=create_keyboard())
@@ -70,6 +79,7 @@ def handle_message(message):
     ''' Send info about specific plate no '''
     number = plate.format_plate(message.text)
     reply = ''
+    photos = []
     
     if number == False:
         reply = f'Введенный вами номер "{message.text}" не распознан как автомобильный номер. Попробуйте снова:'
@@ -80,9 +90,12 @@ def handle_message(message):
         else:
             reply = f"Найденные записи по номеру {message.text}: \n\n"
             for row in rows:
-                reply += f" - {row['description']} ({row['date_created'].date()})"
+                reply += f" - {row['description']} ({row['date_created'].date()}) \n"
+                photos.append(row['photo'])
         set_step(message, STEP_DEFAULT)
     bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard())
+    for photo in photos[:4]:
+        send_photo(message, photo)
 
 # ADD CAR
 

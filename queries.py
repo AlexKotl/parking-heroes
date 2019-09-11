@@ -14,9 +14,9 @@ class Queries:
         return self.db.get_row("SELECT * FROM parking WHERE user_id = %s AND flag=1 ORDER BY id DESC LIMIT 1", (id,))
         
     def get_overall_stats(self):
-        return self.db.get_row("SELECT count(distinct car_plate) as cars_count, count(distinct user_id) as users_count, "\
-            "count(id) as records_count, count(distinct photo)-1 as photo_count "\
-            "FROM parking WHERE flag=1")
+        return self.db.get_row(""" SELECT count(distinct car_plate) as cars_count, count(distinct user_id) as users_count, 
+            COUNT(id) as records_count, count(distinct photo)-1 as photo_count
+            FROM parking WHERE flag=1 """)
 
     def add_parking(self, **kwargs):
         data = {
