@@ -35,6 +35,13 @@ def send_photo(message, filename):
     except:
         print(f'Cant open photo {filename}')
 
+def log_message(func):
+    def wrapped(*kargs, **kwargs):
+        print('{}: {}'.format(kargs[0].chat.id, kargs[0].text))
+        return func(*kargs, **kwargs)
+    return wrapped
+
+
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
 	bot.send_message(chat_id=message.chat.id, text=START_TEXT + '\n\n' + get_summary_text(), reply_markup=create_keyboard())
@@ -50,6 +57,7 @@ def get_summary_text():
 # INFO
 
 @bot.message_handler(func=lambda message: message.text == keyboard_buttons['about'])
+@log_message
 def handle_message(message):
     ''' Send info about bot '''
     bot.send_message(chat_id=message.chat.id, text=ABOUT_TEXT + '\n\n' + get_summary_text(), reply_markup=create_keyboard())
@@ -58,6 +66,7 @@ def handle_message(message):
 # LIST
 
 @bot.message_handler(func=lambda message: message.text == keyboard_buttons['list'])
+@log_message
 def handle_message(message):
     ''' Send LIST of disturbers '''
     text = 'Список 10 героев парковки: \n\n'
@@ -69,12 +78,14 @@ def handle_message(message):
 # CAR DETAILS
     
 @bot.message_handler(func=lambda message: message.text == keyboard_buttons['details'])
+@log_message
 def handle_message(message):
     ''' Ask for plate no to send info about it '''
     bot.send_message(chat_id=message.chat.id, text="Введите номерной знак (например АА8765ОЕ):", reply_markup=create_keyboard())
     set_step(message, STEP_PLATE_INFO)
     
 @bot.message_handler(func=lambda message: get_step(message) == STEP_PLATE_INFO or message.text[:2] == '/_')
+@log_message
 def handle_message(message):
     ''' Send info about specific plate no '''
     if message.text[:2] == '/_':
@@ -89,9 +100,9 @@ def handle_message(message):
     else:
         rows = repo.get_parking_by_plate(number)
         if rows == False:
-            reply = f"Записей по номеру {message.text} не было найдено. Похоже автомобиль не нарушал правил парковки."
+            reply = f"Записей по номеру {number} не было найдено. Похоже автомобиль не нарушал правил парковки."
         else:
-            reply = f"Найденные записи по номеру {message.text}: \n\n"
+            reply = f"Найденные записи по номеру {number}: \n\n"
             for row in rows:
                 reply += f" - {row['description']} ({row['date_created'].date()}) \n"
                 photos.append(row['photo'])
@@ -103,12 +114,14 @@ def handle_message(message):
 # ADD CAR
 
 @bot.message_handler(func=lambda message: message.text == keyboard_buttons['report'])
+@log_message
 def handle_message(message):
     ''' Ask for plate no to add new info '''
     bot.send_message(chat_id=message.chat.id, text="Введите номерной знак нарушителя, чтобы добавить его в базу (например АА8765ОЕ):", reply_markup=create_keyboard())
     set_step(message, STEP_ADD_PLATE)
 
 @bot.message_handler(func=lambda message: get_step(message) == STEP_ADD_PLATE)
+@log_message
 def handle_message(message):
     ''' Adding plate no to database, requesting details '''
     number = plate.format_plate(message.text)
@@ -126,6 +139,7 @@ def handle_message(message):
     bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard())
 
 @bot.message_handler(func=lambda message: get_step(message) == STEP_ADD_DESCRIPTION)
+@log_message
 def handle_message(message):
     ''' Adding description to plate no '''
     row = repo.get_latest_parking_by_user(message.from_user.id)
@@ -160,6 +174,13 @@ def handle_message(message):
     except:
         reply = 'Ошибка при загрузке фото.'
     bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard())
+
+# REST OF COMMANDS
+
+@bot.message_handler(func=lambda _: True)
+@log_message
+def handle_message(message):
+    pass
     
 print('Starting bot...')
 bot.polling()
