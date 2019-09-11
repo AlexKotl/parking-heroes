@@ -39,3 +39,10 @@ class Plate:
             if ch in str:
                 str = str.replace(ch, self.translate_rules[ch])
         return str
+
+    def cyr_to_latin(self, str):
+        for ch in self.translate_rules.values():
+            if ch in str:
+                to_replace = list(self.translate_rules.keys())[list(self.translate_rules.values()).index(ch)]
+                str = str.replace(ch, to_replace)
+        return str
