@@ -62,7 +62,7 @@ def handle_message(message):
     ''' Send LIST of disturbers '''
     text = 'Список 10 героев парковки: \n\n'
     for row in repo.get_top_parkings():
-        text += f" - {row['car_plate']} {row['description']} \n"
+        text += f" - /_{plate.cyr_to_latin(row['car_plate'])} {row['description']} \n"
     bot.send_message(chat_id=message.chat.id, text=text, reply_markup=create_keyboard())
     set_step(message, STEP_DEFAULT)
 
@@ -74,10 +74,13 @@ def handle_message(message):
     bot.send_message(chat_id=message.chat.id, text="Введите номерной знак (например АА8765ОЕ):", reply_markup=create_keyboard())
     set_step(message, STEP_PLATE_INFO)
     
-@bot.message_handler(func=lambda message: get_step(message) == STEP_PLATE_INFO)
+@bot.message_handler(func=lambda message: get_step(message) == STEP_PLATE_INFO or message.text[:2] == '/_')
 def handle_message(message):
     ''' Send info about specific plate no '''
-    number = plate.format_plate(message.text)
+    if message.text[:2] == '/_':
+        number = plate.format_plate(message.text[2:])
+    else:
+        number = plate.format_plate(message.text)
     reply = ''
     photos = []
     
