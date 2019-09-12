@@ -51,7 +51,7 @@ def get_summary_text():
     text = f'У нас уже зафиксировано: *{stats["cars_count"]}* {plural_ru.ru(stats["cars_count"],["нарушитель","нарушителя","нарушителей"])}, ' \
         f'*{stats["records_count"]}* {plural_ru.ru(stats["records_count"],["нарушение","нарушения","нарушений"])} ' \
         f'подтвержденных *{stats["photo_count"]}* {plural_ru.ru(stats["photo_count"],["фотографией","фотографиями","фотографиями"])}, ' \
-        f'о которых нам сообщили *{stats["users_count"]}* {plural_ru.ru(stats["users_count"], ["пользователь","пользователя","пользователей"])}. '
+        f'о которых нам {plural_ru.ru(stats["users_count"], ["сообщил","сообщило","сообщили"])} *{stats["users_count"]}* {plural_ru.ru(stats["users_count"], ["пользователь","пользователя","пользователей"])}. '
     return text
 
 # INFO
