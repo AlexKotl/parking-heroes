@@ -44,14 +44,14 @@ def log_message(func):
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-	bot.send_message(chat_id=message.chat.id, text=START_TEXT + '\n\n' + get_summary_text(), reply_markup=create_keyboard())
+	bot.send_message(chat_id=message.chat.id, text=START_TEXT + '\n\n' + get_summary_text(), reply_markup=create_keyboard(), parse_mode='Markdown')
     
 def get_summary_text():
     stats = repo.get_overall_stats()
-    text = f'У нас уже зафиксировано: {stats["cars_count"]} {plural_ru.ru(stats["cars_count"],["нарушитель","нарушителя","нарушителей"])}, ' \
-        f'{stats["records_count"]} {plural_ru.ru(stats["records_count"],["нарушение","нарушения","нарушений"])} ' \
-        f'подтвержденных {stats["photo_count"]} {plural_ru.ru(stats["photo_count"],["фотографией","фотографиями","фотографиями"])}, ' \
-        f'о которых нам сообщили {stats["users_count"]} {plural_ru.ru(stats["users_count"], ["пользователь","пользователя","пользователей"])}. '
+    text = f'У нас уже зафиксировано: *{stats["cars_count"]}* {plural_ru.ru(stats["cars_count"],["нарушитель","нарушителя","нарушителей"])}, ' \
+        f'*{stats["records_count"]}* {plural_ru.ru(stats["records_count"],["нарушение","нарушения","нарушений"])} ' \
+        f'подтвержденных *{stats["photo_count"]}* {plural_ru.ru(stats["photo_count"],["фотографией","фотографиями","фотографиями"])}, ' \
+        f'о которых нам сообщили *{stats["users_count"]}* {plural_ru.ru(stats["users_count"], ["пользователь","пользователя","пользователей"])}. '
     return text
 
 # INFO
@@ -60,7 +60,7 @@ def get_summary_text():
 @log_message
 def handle_message(message):
     ''' Send info about bot '''
-    bot.send_message(chat_id=message.chat.id, text=ABOUT_TEXT + '\n\n' + get_summary_text(), reply_markup=create_keyboard())
+    bot.send_message(chat_id=message.chat.id, text=ABOUT_TEXT + '\n\n' + get_summary_text(), reply_markup=create_keyboard(), parse_mode='Markdown')
     set_step(message, STEP_DEFAULT)
 
 # LIST
@@ -81,7 +81,7 @@ def handle_message(message):
 @log_message
 def handle_message(message):
     ''' Ask for plate no to send info about it '''
-    bot.send_message(chat_id=message.chat.id, text="Введите номерной знак (например АА8765ОЕ):", reply_markup=create_keyboard())
+    bot.send_message(chat_id=message.chat.id, text="Введите номерной знак (например `АА0000AA`):", reply_markup=create_keyboard(), parse_mode='Markdown')
     set_step(message, STEP_PLATE_INFO)
     
 @bot.message_handler(func=lambda message: get_step(message) == STEP_PLATE_INFO or (getattr(message, 'text')!=None and getattr(message, 'text')[:2] == '/_'))
@@ -96,18 +96,18 @@ def handle_message(message):
     photos = []
     
     if number == False:
-        reply = f'Введенный вами номер "{message.text}" не распознан как автомобильный номер. Попробуйте снова:'
+        reply = f'Введенный вами номер `{message.text}` не распознан как автомобильный номер. Попробуйте снова:'
     else:
         rows = repo.get_parking_by_plate(number)
         if rows == False:
-            reply = f"Записей по номеру {number} не было найдено. Похоже автомобиль не нарушал правил парковки."
+            reply = f"Записей по номеру `{number}` *не найдено*. Похоже автомобиль не нарушал правил парковки."
         else:
-            reply = f"Найденные записи по номеру {number}: \n\n"
+            reply = f"Найденные записи по номеру `{number}`: \n\n"
             for row in rows:
-                reply += f" - {row['description']} ({row['date_created'].date()}) \n"
+                reply += f" - {row['description']} (_{row['date_created'].date()}_) \n"
                 photos.append(row['photo'])
         set_step(message, STEP_DEFAULT)
-    bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard())
+    bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard(), parse_mode='Markdown')
     for photo in photos[:4]:
         send_photo(message, photo)
 
@@ -117,7 +117,7 @@ def handle_message(message):
 @log_message
 def handle_message(message):
     ''' Ask for plate no to add new info '''
-    bot.send_message(chat_id=message.chat.id, text="Введите номерной знак нарушителя, чтобы добавить его в базу (например АА8765ОЕ):", reply_markup=create_keyboard())
+    bot.send_message(chat_id=message.chat.id, text="Введите номерной знак нарушителя, чтобы добавить его в базу (например `АА0000AA`):", reply_markup=create_keyboard(), parse_mode='Markdown')
     set_step(message, STEP_ADD_PLATE)
 
 @bot.message_handler(func=lambda message: get_step(message) == STEP_ADD_PLATE)
@@ -126,17 +126,17 @@ def handle_message(message):
     ''' Adding plate no to database, requesting details '''
     number = plate.format_plate(message.text)
     if number == False:
-        reply = f'Введенный вами номер "{message.text}" не распознан как автомобильный номер. Попробуйте снова:'
+        reply = f'Введенный вами номер `{message.text}` не распознан как автомобильный номер. Попробуйте снова:'
     else:
         try:
             repo.add_parking(car_plate=number, user_id=message.from_user.id, user_username=message.from_user.username, user_first_name=message.from_user.first_name, user_last_name=message.from_user.last_name)
-            reply = f'Машина с номерным знаком {number} добавлена. \n\n' \
-                'Теперь вы можете прикрепить фото нарушения или добавить комментарий (такой как марку и модель авто, условия парковки, пожелания и прочее):'
+            reply = f'Машина с номерным знаком `{number}` *добавлена*. \n\n' \
+                'Теперь вы можете прикрепить *фото* нарушения или добавить *комментарий* (такой как _марку и модель_ авто, _условия парковки_, _пожелания_ и прочее):'
             set_step(message, STEP_ADD_DESCRIPTION)
         except Exception as e:
             reply = f'Ошибка при добавлении записи: {e}'
             set_step(message, STEP_DEFAULT)
-    bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard())
+    bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard(), parse_mode='Markdown')
 
 @bot.message_handler(func=lambda message: get_step(message) == STEP_ADD_DESCRIPTION)
 @log_message
@@ -148,14 +148,14 @@ def handle_message(message):
         repo.edit_parking(row['id'], { 'description': message.text })
         reply = 'Описание к нарушению добавлено.'
         if row['photo'] == '':
-            reply += '\nТеперь можете прикрепить фото нарушения (опционально):'
+            reply += '\nТеперь можете прикрепить *фото* нарушения (_опционально_):'
         else:
             set_step(message, STEP_DEFAULT)
     except:
         reply = f'Что-то пошло не так... Не могу добавить описание. '
         set_step(message, STEP_DEFAULT)
     
-    bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard())
+    bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard(), parse_mode='Markdown')
     
 @bot.message_handler(content_types=['photo'])
 def handle_message(message):
@@ -168,12 +168,12 @@ def handle_message(message):
         repo.edit_parking(row['id'], { 'photo': f"{row['id']}.jpg" })
         reply = 'Фото добавлено.'
         if row['description'] == '':
-            reply += '\nТакже можете добавить комментарий к нарушению (опционально):'
+            reply += '\nТакже можете добавить *комментарий* к нарушению (опционально):'
         else:
             set_step(message, STEP_DEFAULT)
     except:
         reply = 'Ошибка при загрузке фото.'
-    bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard())
+    bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard(), parse_mode='Markdown')
 
 # REST OF COMMANDS
 
