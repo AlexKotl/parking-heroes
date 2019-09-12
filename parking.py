@@ -84,7 +84,7 @@ def handle_message(message):
     bot.send_message(chat_id=message.chat.id, text="Введите номерной знак (например АА8765ОЕ):", reply_markup=create_keyboard())
     set_step(message, STEP_PLATE_INFO)
     
-@bot.message_handler(func=lambda message: get_step(message) == STEP_PLATE_INFO or message.text[:2] == '/_')
+@bot.message_handler(func=lambda message: get_step(message) == STEP_PLATE_INFO or getattr(message, 'text', '') == '/_')
 @log_message
 def handle_message(message):
     ''' Send info about specific plate no '''
