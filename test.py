@@ -11,7 +11,8 @@ class TestPlate(Plate, unittest.TestCase):
         self.assertEqual(self.format_plate('12345 КН'), '12345КН') # another old format
     
     def test_cyr_to_latin(self):
-        self.assertEqual(self.cyr_to_latin('ВВ3333КК'), 'BB3333KK') # to latin
+        self.assertEqual(self.cyr_to_latin('ВВ3333КК'), 'BB3333KK') # to latin 
+        self.assertEqual(self.cyr_to_latin('М3222ДЦ'), 'M3222QZ')
         
     def test_latin_to_cyr(self):
         self.assertEqual(self.format_plate('BB3333KK'), 'ВВ3333КК') # to cyr

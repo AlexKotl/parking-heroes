@@ -15,6 +15,8 @@ class Plate:
         'K': 'К',
         'X': 'Х',
         'M': 'М',
+        'Q': 'Д',
+        'Z': 'Ц'
     }
     
     def format_plate(self, plate):
