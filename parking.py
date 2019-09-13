@@ -4,8 +4,8 @@ import datetime
 import requests
 import plural_ru
 from collections import defaultdict
-from queries import Queries 
-from plate import Plate
+from classes.queries import Queries 
+from classes.plate import Plate
 from settings import *
 BOT_TOKEN = os.environ['BOT_TOKEN']
 STEP_DEFAULT, STEP_PLATE_INFO, STEP_ADD_PLATE, STEP_ADD_DESCRIPTION = range(4)
@@ -104,7 +104,7 @@ def handle_message(message):
         else:
             reply = f"Найденные записи по номеру `{number}`: \n\n"
             for row in rows:
-                reply += f" - {row['description']} (_{row['date_created'].date()}_) \n"
+                reply += f" ❗️ {row['description']} (_{row['date_created'].date()}_) \n"
                 photos.append(row['photo'])
         set_step(message, STEP_DEFAULT)
     bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard(), parse_mode='Markdown')
