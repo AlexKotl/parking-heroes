@@ -71,7 +71,7 @@ def handle_message(message):
     ''' Send LIST of disturbers '''
     text = 'Список 10 героев парковки: \n\n'
     for row in repo.get_top_parkings():
-        text += f" - /_{plate.cyr_to_latin(row['car_plate'])} - {row['count']} {plural_ru.ru(row['count'],['нарушение','нарушения','нарушений'])} \n"
+        text += f" /_{plate.cyr_to_latin(row['car_plate'])} - {row['count']} {plural_ru.ru(row['count'],['нарушение','нарушения','нарушений'])} \n"
     bot.send_message(chat_id=message.chat.id, text=text, reply_markup=create_keyboard())
     set_step(message, STEP_DEFAULT)
 
