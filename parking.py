@@ -82,7 +82,7 @@ def handle_message(message):
 @log_message
 def handle_message(message):
     ''' Ask for plate no to send info about it '''
-    bot.send_message(chat_id=message.chat.id, text="Введите номерной знак (например `АА0000AA`):", reply_markup=create_keyboard(), parse_mode='Markdown')
+    bot.send_message(chat_id=message.chat.id, text="Введите номерной знак для проверки авто в базе (например `АА0000AA`):", reply_markup=create_keyboard(), parse_mode='Markdown')
     set_step(message, STEP_PLATE_INFO)
     
 @bot.message_handler(func=lambda message: get_step(message) == STEP_PLATE_INFO or (getattr(message, 'text')!=None and getattr(message, 'text')[:2] == '/_'))
@@ -131,8 +131,8 @@ def handle_message(message):
     else:
         try:
             repo.add_parking(car_plate=number, user_id=message.from_user.id, user_username=message.from_user.username, user_first_name=message.from_user.first_name, user_last_name=message.from_user.last_name)
-            reply = f'Машина с номерным знаком `{number}` *добавлена*. \n\n' \
-                'Теперь вы можете прикрепить *фото* нарушения или добавить *комментарий* (такой как _марку и модель_ авто, _условия парковки_, _пожелания_ и прочее):'
+            reply = f'Машина с номерным знаком `{number}` *добавлена* ✅ \n\n' \
+                'Теперь вы можете прикрепить *фото* 📷 нарушения или добавить *комментарий* 📝 (такой как _марку и модель_ авто, _условия парковки_, _пожелания_ и прочее):'
             set_step(message, STEP_ADD_DESCRIPTION)
         except Exception as e:
             reply = f'Ошибка при добавлении записи: {e}'
@@ -147,9 +147,9 @@ def handle_message(message):
     reply = ''
     try:
         repo.edit_parking(row['id'], { 'description': message.text })
-        reply = 'Описание к нарушению добавлено.'
+        reply = 'Описание к нарушению добавлено ✅'
         if row['photo'] == '':
-            reply += '\nТеперь можете прикрепить *фото* нарушения (_опционально_):'
+            reply += '\nТеперь можете прикрепить *фото* 📷 нарушения (_опционально_):'
         else:
             set_step(message, STEP_DEFAULT)
     except:
@@ -167,9 +167,9 @@ def handle_message(message):
         with open(os.path.join("upload", f"{row['id']}.jpg"), 'wb') as f:
             f.write(photo.content)
         repo.edit_parking(row['id'], { 'photo': f"{row['id']}.jpg" })
-        reply = 'Фото добавлено.'
+        reply = 'Фото добавлено ✅'
         if row['description'] == '':
-            reply += '\nТакже можете добавить *комментарий* к нарушению (опционально):'
+            reply += '\nТакже можете добавить *комментарий* 📝 к нарушению (опционально):'
         else:
             set_step(message, STEP_DEFAULT)
     except:
