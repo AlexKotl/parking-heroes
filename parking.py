@@ -38,6 +38,7 @@ def send_photo(message, filename):
 def log_message(func):
     def wrapped(*kargs, **kwargs):
         print('{}: {}'.format(kargs[0].chat.id, kargs[0].text))
+        repo.add_log(message=kargs[0].text, chat_id=kargs[0].chat.id, user_id=kargs[0].from_user.id, username=kargs[0].from_user.username)
         return func(*kargs, **kwargs)
     return wrapped
 

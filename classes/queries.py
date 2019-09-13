@@ -34,3 +34,11 @@ class Queries:
         
     def edit_parking(self, id, data):
         return self.db.update('parking', id, data)
+
+    def add_log(self, message, user_id=0, chat_id=0, username=''):
+        return self.db.insert('log', {
+            'message': message,
+            'user_id': int(user_id),
+            'chat_id': int(chat_id),
+            'username': username
+        })
