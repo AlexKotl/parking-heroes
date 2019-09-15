@@ -1,19 +1,29 @@
 import os
 import telebot
+import flask
 import datetime
 import requests
 import plural_ru
+import logging
 from collections import defaultdict
 from classes.queries import Queries 
 from classes.plate import Plate
 from settings import *
 BOT_TOKEN = os.environ['BOT_TOKEN']
+BOT_METHOD = os.environ['BOT_METHOD']
 STEP_DEFAULT, STEP_PLATE_INFO, STEP_ADD_PLATE, STEP_ADD_DESCRIPTION = range(4)
 
 user_step = defaultdict(lambda: STEP_DEFAULT)
 bot = telebot.TeleBot(BOT_TOKEN)
 repo = Queries()
 plate = Plate()
+
+if BOT_METHOD == 'webhook':
+    logger = telebot.logger
+    # set to logging.DEBUG when debugging
+    telebot.logger.setLevel(logging.INFO) 
+
+    app = flask.Flask(__name__)
 
 def create_keyboard():
     keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
@@ -182,6 +192,32 @@ def handle_message(message):
 @log_message
 def handle_message(message):
     pass
-    
-print('Starting bot...')
-bot.polling()
+
+print("Starting bot...")
+if BOT_METHOD == 'webhook':
+    # Empty webserver index, return nothing, just http 200
+    @app.route('/', methods=['GET', 'HEAD'])
+    def index():
+        return ''
+        
+    # Process webhook calls
+    @app.route(f"/{BOT_TOKEN}/", methods=['POST'])
+    def webhook():
+        if flask.request.headers.get('content-type') == 'application/json':
+            json_string = flask.request.get_data().decode('utf-8')
+            update = telebot.types.Update.de_json(json_string)
+            bot.process_new_updates([update])
+            return ''
+        else:
+            flask.abort(403)
+            
+    bot.remove_webhook()
+    time.sleep(0.1)
+    bot.set_webhook(url="https://{}:{}/{}/".format(os.environ['WEBHOOK_HOST'], os.environ['WEBHOOK_PORT'], BOT_TOKEN), certificate=open(os.environ['WEBHOOK_SSL_CERT'], 'r'))
+
+    app.run(host=os.environ['WEBHOOK_LISTEN'], 
+        port=os.environ['WEBHOOK_PORT'], 
+        ssl_context=(os.environ['WEBHOOK_SSL_CERT'], os.environ['WEBHOOK_SSL_PRIV']), 
+        debug=True)
+else:
+    bot.polling()
