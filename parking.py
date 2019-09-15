@@ -4,6 +4,7 @@ import flask
 import datetime
 import requests
 import plural_ru
+import logging
 from collections import defaultdict
 from classes.queries import Queries 
 from classes.plate import Plate
@@ -199,7 +200,7 @@ if BOT_METHOD == 'webhook':
         return ''
         
     # Process webhook calls
-    @app.route(WEBHOOK_URL_PATH, methods=['POST'])
+    @app.route(f"/{BOT_TOKEN}/", methods=['POST'])
     def webhook():
         if flask.request.headers.get('content-type') == 'application/json':
             json_string = flask.request.get_data().decode('utf-8')
@@ -211,7 +212,7 @@ if BOT_METHOD == 'webhook':
             
     bot.remove_webhook()
     time.sleep(0.1)
-    bot.set_webhook(url="https://%s:%s/%s".format(os.environ['WEBHOOK_HOST'], os.environ['WEBHOOK_PORT'], BOT_TOKEN), certificate=open(os.environ['WEBHOOK_SSL_CERT'], 'r'))
+    bot.set_webhook(url="https://{}:{}/{}".format(os.environ['WEBHOOK_HOST'], os.environ['WEBHOOK_PORT'], BOT_TOKEN), certificate=open(os.environ['WEBHOOK_SSL_CERT'], 'r'))
 
     app.run(host=os.environ['WEBHOOK_LISTEN'], 
         port=os.environ['WEBHOOK_PORT'], 
