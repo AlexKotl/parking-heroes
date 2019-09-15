@@ -24,8 +24,7 @@ Then add this task:
 `* * * * * pgrep -f parking.py || cd /home/PATH_TO_DIR/parking/; /local/bin/pipenv run python -u parking.py >> log.txt 2>&1`
 
 ### Setting up webhooks ###
+Generate certificate:
 ```
-openssl genrsa -out webhook_pkey.pem 2048
-openssl req -new -x509 -days 3650 -key webhook_pkey.pem -out webhook_cert.pem
+openssl req -newkey rsa:2048 -sha256 -nodes -keyout cert.key -x509 -days 365 -out cert.pem -subj "/C=UA/ST=Kyiv/L=Kyiv/O=Home/CN=DMAIN_NAME"
 ```
-

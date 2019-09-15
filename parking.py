@@ -20,7 +20,8 @@ plate = Plate()
 
 if BOT_METHOD == 'webhook':
     logger = telebot.logger
-    telebot.logger.setLevel(logging.INFO)
+    # set to logging.DEBUG when debugging
+    telebot.logger.setLevel(logging.INFO) 
 
     app = flask.Flask(__name__)
 
@@ -212,7 +213,7 @@ if BOT_METHOD == 'webhook':
             
     bot.remove_webhook()
     time.sleep(0.1)
-    bot.set_webhook(url="https://{}:{}/{}".format(os.environ['WEBHOOK_HOST'], os.environ['WEBHOOK_PORT'], BOT_TOKEN), certificate=open(os.environ['WEBHOOK_SSL_CERT'], 'r'))
+    bot.set_webhook(url="https://{}:{}/{}/".format(os.environ['WEBHOOK_HOST'], os.environ['WEBHOOK_PORT'], BOT_TOKEN), certificate=open(os.environ['WEBHOOK_SSL_CERT'], 'r'))
 
     app.run(host=os.environ['WEBHOOK_LISTEN'], 
         port=os.environ['WEBHOOK_PORT'], 
