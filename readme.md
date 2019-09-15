@@ -21,4 +21,4 @@ You can setup crontab to restart app if it will crash. Add cron using:
 `crontab -e`
 
 Then add this task:
-`* * * * * pgrep -f parking.py || cd /home/PATH_TO_DIR/parking/; touch bash/log.cron.started; /local/bin/pipenv run python -u parking.py >> log.txt 2>&1`
+`* * * * * pgrep -f parking.py || cd /home/PATH_TO_DIR/parking/; /local/bin/pipenv run python -u parking.py >> log.txt 2>&1`
