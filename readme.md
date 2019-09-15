@@ -22,3 +22,10 @@ You can setup crontab to restart app if it will crash. Add cron using:
 
 Then add this task:
 `* * * * * pgrep -f parking.py || cd /home/PATH_TO_DIR/parking/; /local/bin/pipenv run python -u parking.py >> log.txt 2>&1`
+
+### Setting up webhooks ###
+```
+openssl genrsa -out webhook_pkey.pem 2048
+openssl req -new -x509 -days 3650 -key webhook_pkey.pem -out webhook_cert.pem
+```
+

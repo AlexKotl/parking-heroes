@@ -9,6 +9,7 @@ verify_ssl = true
 pytelegrambotapi = "*"
 pymysql = "*"
 plural-ru = "*"
+flask = "*"
 
 [requires]
 python_version = "3.6"
