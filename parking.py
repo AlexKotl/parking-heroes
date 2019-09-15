@@ -5,6 +5,7 @@ import datetime
 import requests
 import plural_ru
 import logging
+import time
 from collections import defaultdict
 from classes.queries import Queries 
 from classes.plate import Plate
@@ -218,6 +219,6 @@ if BOT_METHOD == 'webhook':
     app.run(host=os.environ['WEBHOOK_LISTEN'], 
         port=os.environ['WEBHOOK_PORT'], 
         ssl_context=(os.environ['WEBHOOK_SSL_CERT'], os.environ['WEBHOOK_SSL_PRIV']), 
-        debug=True)
+        debug=False)
 else:
     bot.polling()
