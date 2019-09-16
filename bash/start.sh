@@ -1,3 +1,3 @@
 #!/bin/bash
-echo "Starting Python in env. "
-nohup python -u parking.py &> ./../parking.log &
+echo "Starting script. "
+nohup python -u parking.py &> ./log.parking &
