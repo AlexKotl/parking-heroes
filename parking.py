@@ -55,6 +55,7 @@ def log_message(func):
 
 
 @bot.message_handler(commands=['start'])
+@log_message
 def send_welcome(message):
 	bot.send_message(chat_id=message.chat.id, text=START_TEXT + '\n\n' + get_summary_text(), reply_markup=create_keyboard(), parse_mode='Markdown')
     
