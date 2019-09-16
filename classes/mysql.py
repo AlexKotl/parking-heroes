@@ -19,6 +19,7 @@ class MySQL:
         ''' Run query and return cursor '''
         with self.db.cursor() as cursor:
             cursor.execute(query, data)
+            cursor.close()
             if int(cursor.rowcount) == 0:
                 return False
             return cursor
@@ -39,6 +40,7 @@ class MySQL:
         sql = "INSERT INTO {} ({}) VALUES ({})".format(table, ', '.join(data.keys()), ', '.join(('%s' for _ in data)))
         with self.db.cursor() as cursor:
             cursor.execute(sql, list(data.values()))
+            cursor.close()
             self.db.commit()
     
     def update(self, table, id, data):
@@ -47,4 +49,5 @@ class MySQL:
         sql = "UPDATE {} SET {} WHERE id={}".format(table, fields, id)
         with self.db.cursor() as cursor:
             cursor.execute(sql, list(data.values()))
+            cursor.close()
             self.db.commit()
