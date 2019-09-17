@@ -200,7 +200,7 @@ if BOT_METHOD == 'webhook':
     # Empty webserver index, return nothing, just http 200
     @app.route('/', methods=['GET', 'HEAD'])
     def index():
-        return ''
+        return get_summary_text()
         
     # Process webhook calls
     @app.route(f"/{BOT_TOKEN}/", methods=['POST'])
