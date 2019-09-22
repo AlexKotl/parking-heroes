@@ -30,6 +30,14 @@ def create_keyboard():
     keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
     keyboard.add(*keyboard_buttons.values())
     return keyboard
+    
+def action_inline_keyboard():
+    keyboard = telebot.types.InlineKeyboardMarkup(row_width=2)
+    keyboard.add(
+        telebot.types.InlineKeyboardButton(text=keyboard_buttons['report'], callback_data='/add'),
+        telebot.types.InlineKeyboardButton(text=keyboard_buttons['details'], callback_data='/details')
+    )
+    return keyboard
 
 def get_step(message):
     return user_step[message.chat.id]
@@ -187,7 +195,17 @@ def handle_message(message):
     except:
         reply = 'Ошибка при загрузке фото.'
     bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard(), parse_mode='Markdown')
-
+    
+# USER ENTERED pLATE NO WITHOUT COMMAND
+@bot.message_handler(func=lambda message: get_step(message) == STEP_DEFAULT and plate.format_plate(message.text))
+@log_message
+def handle_message(message):
+    bot.send_message(chat_id=message.chat.id, text=f"Вы ввели номер `{plate.format_plate(message.text)}`. Что вы хотите с ним сделать?", reply_markup=action_inline_keyboard(), parse_mode='Markdown')
+    
+@bot.callback_query_handler(func=lambda x: True)
+def callback_handler(callback_query):
+    print(callback_query)
+    
 # REST OF COMMANDS
 
 @bot.message_handler(func=lambda _: True)
