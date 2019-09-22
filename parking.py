@@ -6,13 +6,19 @@ import requests
 import plural_ru
 import logging
 import time
+import sys
 from collections import defaultdict
 from classes.queries import Queries 
 from classes.plate import Plate
 from settings import *
+
+# BOT part modules
+sys.path.insert(1, 'parking')
+import parking_details
+
 BOT_TOKEN = os.environ['BOT_TOKEN']
 BOT_METHOD = os.environ['BOT_METHOD']
-STEP_DEFAULT, STEP_PLATE_INFO, STEP_ADD_PLATE, STEP_ADD_DESCRIPTION = range(4)
+
 
 user_step = defaultdict(lambda: STEP_DEFAULT)
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -101,9 +107,7 @@ def handle_message(message):
 @bot.message_handler(func=lambda message: message.text == keyboard_buttons['details'])
 @log_message
 def handle_message(message):
-    ''' Ask for plate no to send info about it '''
-    bot.send_message(chat_id=message.chat.id, text="Введите номерной знак для проверки авто в базе (например `АА0000AA`):", reply_markup=create_keyboard(), parse_mode='Markdown')
-    set_step(message, STEP_PLATE_INFO)
+    parking_details.ask_plate_num(message, bot, set_step,create_keyboard)
     
 @bot.message_handler(func=lambda message: get_step(message) == STEP_PLATE_INFO or (getattr(message, 'text')!=None and getattr(message, 'text')[:2] == '/_'))
 @log_message
@@ -196,7 +200,7 @@ def handle_message(message):
         reply = 'Ошибка при загрузке фото.'
     bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard(), parse_mode='Markdown')
     
-# USER ENTERED pLATE NO WITHOUT COMMAND
+# USER ENTERED PLATE NO WITHOUT COMMAND
 @bot.message_handler(func=lambda message: get_step(message) == STEP_DEFAULT and plate.format_plate(message.text))
 @log_message
 def handle_message(message):
@@ -205,6 +209,8 @@ def handle_message(message):
 @bot.callback_query_handler(func=lambda x: True)
 def callback_handler(callback_query):
     print(callback_query)
+    r = telebot.types.InlineQueryResultArticle('0', 'Result1', telebot.types.InputTextMessageContent('hi'))
+    bot.answer_inline_query(callback_query.id, [r])
     
 # REST OF COMMANDS
 
