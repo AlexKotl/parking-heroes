@@ -1,12 +1,15 @@
 ## About ##
-Telegram bot about parking disturbers.
+Telegram bot for fixing car parking violations. Allows to enter car plate No, description and attach picture of violation.
+Displaying statistics about most common drivers and information about specific plate No.
+
+![alt text](https://github.com/AlexKotl/parking-heroes/blob/master/misc/screens/screen1.png?raw=true) ![alt text](https://github.com/AlexKotl/parking-heroes/blob/master/misc/screens/screen2.png?raw=true)
 
 ## Start project ##
 `pipenv install`
 `pipenv shell`
 `nohup python parking.py &` or `nohup python -u parking.py &> ./../parking.log &`
 
-To stop background process: 
+To stop background process:
 `ps -ef | grep "parking.py" | grep -v grep | awk '{print $2}' | xargs kill`
 
 For convenience run bash scripts:
