@@ -8,7 +8,7 @@ import logging
 import time
 import sys
 from collections import defaultdict
-from classes.queries import Queries 
+from classes.queries import Queries
 from classes.plate import Plate
 from settings import *
 
@@ -28,7 +28,7 @@ plate = Plate()
 if BOT_METHOD == 'webhook':
     logger = telebot.logger
     # set to logging.DEBUG when debugging
-    telebot.logger.setLevel(logging.INFO) 
+    telebot.logger.setLevel(logging.INFO)
 
     app = flask.Flask(__name__)
 
@@ -36,7 +36,7 @@ def create_keyboard():
     keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
     keyboard.add(*keyboard_buttons.values())
     return keyboard
-    
+
 def action_inline_keyboard():
     keyboard = telebot.types.InlineKeyboardMarkup(row_width=2)
     keyboard.add(
@@ -47,7 +47,7 @@ def action_inline_keyboard():
 
 def get_step(message):
     return user_step[message.chat.id]
-    
+
 def set_step(message, step):
     user_step[message.chat.id] = step
 
@@ -72,7 +72,7 @@ def log_message(func):
 @log_message
 def send_welcome(message):
 	bot.send_message(chat_id=message.chat.id, text=START_TEXT + '\n\n' + get_summary_text(), reply_markup=create_keyboard(), parse_mode='Markdown')
-    
+
 def get_summary_text():
     stats = repo.get_overall_stats()
     text = f'У нас уже зафиксировано: *{stats["cars_count"]}* {plural_ru.ru(stats["cars_count"],["нарушитель","нарушителя","нарушителей"])}, ' \
@@ -103,12 +103,12 @@ def handle_message(message):
     set_step(message, STEP_DEFAULT)
 
 # CAR DETAILS
-    
+
 @bot.message_handler(func=lambda message: message.text == keyboard_buttons['details'])
 @log_message
 def handle_message(message):
     parking_details.ask_plate_num(message, bot, set_step,create_keyboard)
-    
+
 @bot.message_handler(func=lambda message: get_step(message) == STEP_PLATE_INFO or (getattr(message, 'text')!=None and getattr(message, 'text')[:2] == '/_'))
 @log_message
 def handle_message(message):
@@ -157,9 +157,9 @@ def handle_message(message):
     except:
         reply = f'Что-то пошло не так... Не могу добавить описание. '
         set_step(message, STEP_DEFAULT)
-    
+
     bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard(), parse_mode='Markdown')
-    
+
 @bot.message_handler(content_types=['photo'])
 def handle_message(message):
     try:
@@ -177,19 +177,19 @@ def handle_message(message):
     except:
         reply = 'Ошибка при загрузке фото.'
     bot.send_message(chat_id=message.chat.id, text=reply, reply_markup=create_keyboard(), parse_mode='Markdown')
-    
+
 # USER ENTERED PLATE NO WITHOUT COMMAND
 @bot.message_handler(func=lambda message: get_step(message) == STEP_DEFAULT and plate.format_plate(message.text))
 @log_message
 def handle_message(message):
     bot.send_message(chat_id=message.chat.id, text=f"Вы ввели номер `{plate.format_plate(message.text)}`. Что вы хотите с ним сделать?", reply_markup=action_inline_keyboard(), parse_mode='Markdown')
-    
+
 @bot.callback_query_handler(func=lambda x: True)
 def callback_handler(callback_query):
     print(callback_query)
     r = telebot.types.InlineQueryResultArticle('0', 'Result1', telebot.types.InputTextMessageContent('hi'))
     bot.answer_inline_query(callback_query.id, [r])
-    
+
 # REST OF COMMANDS
 
 @bot.message_handler(func=lambda _: True)
@@ -203,7 +203,7 @@ if BOT_METHOD == 'webhook':
     @app.route('/', methods=['GET', 'HEAD'])
     def index():
         return get_summary_text()
-        
+
     # Process webhook calls
     @app.route(f"/{BOT_TOKEN}/", methods=['POST'])
     def webhook():
@@ -214,14 +214,14 @@ if BOT_METHOD == 'webhook':
             return ''
         else:
             flask.abort(403)
-            
+
     bot.remove_webhook()
     time.sleep(0.1)
     bot.set_webhook(url="https://{}:{}/{}/".format(os.environ['WEBHOOK_HOST'], os.environ['WEBHOOK_PORT'], BOT_TOKEN), certificate=open(os.environ['WEBHOOK_SSL_CERT'], 'r'))
 
-    app.run(host=os.environ['WEBHOOK_LISTEN'], 
-        port=os.environ['WEBHOOK_PORT'], 
-        ssl_context=(os.environ['WEBHOOK_SSL_CERT'], os.environ['WEBHOOK_SSL_PRIV']), 
+    app.run(host=os.environ['WEBHOOK_LISTEN'],
+        port=os.environ['SERVER_PORT'], 
+        ssl_context=(os.environ['WEBHOOK_SSL_CERT'], os.environ['WEBHOOK_SSL_PRIV']),
         debug=False)
 else:
     bot.polling()
