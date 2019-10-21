@@ -31,3 +31,35 @@ Generate certificate:
 ```
 openssl req -newkey rsa:2048 -sha256 -nodes -keyout cert.key -x509 -days 365 -out cert.pem -subj "/C=UA/ST=Kyiv/L=Kyiv/O=Home/CN=DMAIN_NAME"
 ```
+
+## Setting up Production server ##
+Nginx setup should looks like:
+```
+server {
+   listen 8443 ssl;
+   server_name bot.smartcups.com.ua;
+   ssl_certificate /home/slicer/parking/cert.pem;
+   ssl_certificate_key /home/slicer/parking/cert.key;
+
+   location / {
+           proxy_pass https://127.0.0.1:8444;
+   }
+}
+```
+
+Daemon sample:
+```
+[Unit]
+Description=Service for parking telegram bot
+
+[Service]
+Restart=on-failure
+User=slicer
+WorkingDirectory=/home/slicer/parking
+
+ExecStart=/home/slicer/.local/bin/pipenv run python parking.py
+
+[Install]
+WantedBy=multi-user.target
+```
+Then, after systemctl update, server could be started with `sudo systemctl start parking`
